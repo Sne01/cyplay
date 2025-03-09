@@ -19,6 +19,7 @@ import '../e2e/commands';
 import '../e2e/tasky_with_only_cypress/tasky_commands';
 import './env';
 import './gchat_reports/gchat_report';
+import 'cypress-shadow-dom';
 
 // Alternatively you can use CommonJS syntax:
 require('cypress-xpath')

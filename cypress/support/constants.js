@@ -1,3 +1,5 @@
+const { password } = require("./locators");
+
 module.exports = Object.freeze({
 
     //Login Ids
@@ -21,6 +23,16 @@ module.exports = Object.freeze({
     status: "Status",
     vc_agent: "VC Agent",
     time: "Time",
+    email_id: "bot-admin@idfy.com",
+    password:"JcTgW2Wtgb",
+
+
+    domain:"default",
+    sub_domain:"default",
+    environment:"staging",
+    //service_name:"Automation testing",
+    label:"Automation testing.",
+    service_details:"This is automation testing for Assets."
 
 });
 
