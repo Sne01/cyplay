@@ -1,0 +1,43 @@
+
+{
+    "locators": {
+        "serviceLabel": "#service_label_0",
+        "primaryButton": ".btn-primary",
+        "domain": "#submit_metadata_domain_id",
+        "subDomain": "#submit_metadata_sub_domain_id",
+        "environment": "#submit_metadata_environment_id",
+        "name": "#submit_metadata_name",
+        "displayName": "#submit_metadata_display_name",
+        "description": "#submit_metadata_description",
+        "database": "#submit_connection_details_database",
+        "host": "#submit_connection_details_host",
+        "port": "#submit_connection_details_port",
+        "username": "#submit_connection_details_username",
+        "password": "#submit_connection_details_password",
+        "testConnection": "#test-connection-button",
+        "closeModal": "#close-modal-btn",
+        "submitButton": "[type='submit']"
+    },
+
+   
+        "postgres": {
+            "serviceConfig": {
+                "domain": "default",
+                "subDomain": "default",
+                "environment": "staging",
+                "name": "Postgresservice",
+                "displayName": "Postgres DB Automation",
+                "description": "Postgres database for staging environment"
+            },
+            "connectionDetails": {
+                "database": "addressify-staging",
+                "host": "10.140.224.230",
+                "port": "5432",
+                "username": "addressify-app",
+                "password": "r00t.123"
+    
+            }
+        }
+        
+} 
+    

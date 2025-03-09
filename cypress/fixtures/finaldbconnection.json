@@ -1,0 +1,17 @@
+{
+    "serviceMetadata": {
+      "domain": "default",
+      "subDomain": "default", 
+      "environment": "staging",
+      "serviceName": "automationpostgres11",
+      "label": "automationtesting",
+      "serviceDetails": "This is postgres database."
+    },
+    "connectionDetails": {
+      "database": "addressify-staging",
+      "host": "10.140.224.230",
+      "port": "5432",
+      "username": "addressify-app",
+      "password": "r00t.123"
+    }
+  }
