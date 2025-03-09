@@ -45,27 +45,165 @@ Cypress.Commands.add('login', (user, login_type, context) => {
 });
 
 Cypress.Commands.add('loginDC', (user, login_type, context) => {
-    cy.visit(context.client_data[login_type]);
-    cy.xpath(locators.email).type(context.creds[user].email);
-    cy.xpath(locators.login_button).click();
-    cy.xpath(locators.password).type(context.creds[user].password);
-    cy.xpath(locators.continue_button).click();
+    //email
+    cy.visit("https://data-compass.auriga.privyone.com/");
+    cy.get(locators.shadowroot_email)
+    .shadow()
+    .find(locators.shadowroot_email2)
+    .shadow()
+    .find(locators.email)
+    .type(context.creds[user].email); 
     cy.wait(1000)
-    cy.reload();
+    // login button
+    cy.get(locators.shadowroot_login_button)
+    .shadow()
+    .find(locators.shadowroot_login_button1)
+    .shadow()
+    .find(locators.login_button)
+    .click();
     cy.wait(1000)
+    // password
+    cy.get(locators.shadowroot_password)
+    .shadow()
+    .find(locators.shadowroot_password1)
+    .shadow()
+    .find(locators.password)
+    .type(context.creds[user].password); 
+ 
+    // continue button
+    cy.get(locators.shadowroot_continue_button)
+    .shadow()
+    .find(locators.shadowroot_continue_button1)
+    .shadow()
+    .find(locators.continue_button)
+    .click();
+    
 });
 
 
-Cypress.Commands.add('loginDataC', (user, login_type, context) => {
-    cy.visit('https://data-compass.auriga.privyone.com/');
-    cy.get('.pf-c-form__group').get('.pf-c-form-control').type("bot-admin@idfy.com")
-    cy.get('.pf-c-button.pf-m-primary.pf-m-block', { includeShadowDom: true }).click()
-    cy.get('#ak-stage-password-input', { includeShadowDom: true }).type("JcTgW2Wtgb")
-    cy.get('.pf-c-button.pf-m-primary.pf-m-block', { includeShadowDom: true }).click()
+//For asset creation 
+Cypress.Commands.add('createDataCompassAsset', (assetDetails) => {
+
+    // Select service
+    cy.get('#service_label_0').click()
     cy.wait(1000)
-    cy.reload();
+    cy.get('.btn-primary').click()
+    
+    // Fill metadata
+    cy.get('#submit_metadata_domain_id').select(assetDetails.domain || 'default')
+    cy.get('#submit_metadata_sub_domain_id').select(assetDetails.subDomain || 'default')
+    cy.get('#submit_metadata_environment_id').select(assetDetails.environment || 'staging')
+    cy.get('#submit_metadata_name').type(assetDetails.name)
+    cy.get('#submit_metadata_display_name').type(assetDetails.displayName)
+    cy.get('#submit_metadata_description').type(assetDetails.description)
+    cy.get('.btn-primary').click()
+    
+    // Fill connection details
+    cy.get('#submit_connection_details_database').type(assetDetails.database)
+    cy.get('#submit_connection_details_host').type(assetDetails.host)
+    cy.get('#submit_connection_details_port').type(assetDetails.port)
+    cy.get('#submit_connection_details_username').type(assetDetails.username)
+    cy.get('#submit_connection_details_password').type(assetDetails.password)
+    cy.get('#submit_connection_details_account').type(assetDetails.account)
+    // cy.get().type(assetDetails.role)
+    // cy.get
+    // Test connection and submit
+    cy.get('#test-connection-button').click()
+    cy.wait(5000)
+    cy.get('#close-modal-btn').click()
     cy.wait(1000)
+    cy.get('[type="submit"]').click()
+  })
+
+
+
+
+  // cypress/support/commands.js
+Cypress.Commands.add('createDataCompassAsset1', (assetDetails) => {
+    // Select service
+    cy.get(assetDetails.locators.serviceLabel).click();
+    cy.wait(1000);
+    cy.get(assetDetails.locators.primaryButton).click();
+    
+    // Fill metadata
+    cy.get(assetDetails.locators.domain).select(assetDetails.data.domain);
+    cy.get(assetDetails.locators.subDomain).select(assetDetails.data.subDomain);
+    cy.get(assetDetails.locators.environment).select(assetDetails.data.environment);
+    cy.get(assetDetails.locators.name).type(assetDetails.data.name);
+    cy.get(assetDetails.locators.displayName).type(assetDetails.data.displayName);
+    cy.get(assetDetails.locators.description).type(assetDetails.data.description);
+    cy.get(assetDetails.locators.primaryButton).click();
+    
+    // Fill connection details
+    cy.get(assetDetails.locators.database).type(assetDetails.connectionDetails.database);
+    cy.get(assetDetails.locators.host).type(assetDetails.connectionDetails.host);
+    cy.get(assetDetails.locators.port).type(assetDetails.connectionDetails.port);
+    cy.get(assetDetails.locators.username).type(assetDetails.connectionDetails.username);
+    cy.get(assetDetails.locators.password).type(assetDetails.connectionDetails.password);
+    //cy.get(assetDetails.locators.account).type(assetDetails.connectionDetails.account);
+    
+    // Test connection and submit
+    cy.get(assetDetails.locators.testConnection).click();
+    cy.wait(2000);
+    cy.get(assetDetails.locators.closeModal).click();
+    cy.wait(1000);
+    cy.get(assetDetails.locators.submitButton).click();
 });
+
+
+
+import { databaseFieldMappings } from '../../cypress/support/databasemapping.js';
+
+Cypress.Commands.add('selectDatabaseAndFillCredentials', (databaseType) => {
+  // Validate the database type
+  const validDatabaseTypes = Object.keys(databaseFieldMappings);
+  
+  if (!validDatabaseTypes.includes(databaseType)) {
+    throw new Error(`Invalid database type: ${databaseType}`);
+  }
+
+  // Select the database type from UI dropdown
+  cy.get('#service_label_0').click();
+  cy.get('.btn-primary').click();
+  
+  // Wait for UI to update dynamically based on selected database
+  cy.wait(1000); // Adjust wait time or use a better approach like `cy.intercept()`
+
+  // Load credentials from JSON file
+  cy.fixture('databaseconfigurations.json').then((serviceConfig) => {
+    const dbCredentials = serviceConfig[databaseType];
+    const fieldMapping = databaseFieldMappings[databaseType];
+
+    
+    
+    // Wait for dynamic fields to load (Adjust this based on how UI updates)
+    cy.wait(2000);
+
+    // Fill required fields
+    fieldMapping.requiredFields.forEach((field) => {
+      cy.get(`[data-testid="${field}"]`).should('be.visible').then(($input) => {
+        if (dbCredentials[field]) {
+          cy.wrap($input).clear().type(dbCredentials[field]);
+          cy.wrap($input).should('have.value', dbCredentials[field]);
+        } else {
+          throw new Error(`Missing required field: ${field} for ${databaseType}`);
+        }
+      });
+    });
+
+    // // Fill optional fields if they exist and are visible
+    
+  });
+
+  // Test connection
+  cy.get('#test-connection-button').click();
+  cy.wait(2000); // Ensure connection check completes
+  cy.get('#close-modal-btn').click();
+
+  // Submit the form
+  cy.get('[type="submit"]').click();
+});
+
 
 
 /**
@@ -194,3 +332,96 @@ Cypress.Commands.add('get_url_link', (message_id, partial_link_text) => {
 
 
 
+Cypress.Commands.add('createDataCompassAsset01', (assetDetails) => {
+    // Select service
+    cy.get(assetDetails.locators.serviceLabel).click();
+    cy.wait(1000);
+    cy.get(assetDetails.locators.primaryButton).click();
+    
+    // Fill metadata
+    cy.get(assetDetails.locators.domain).select(assetDetails.data.domain);
+    cy.get(assetDetails.locators.subDomain).select(assetDetails.data.subDomain);
+    cy.get(assetDetails.locators.environment).select(assetDetails.data.environment);
+    cy.get(assetDetails.locators.name).type(assetDetails.data.name);
+    cy.get(assetDetails.locators.displayName).type(assetDetails.data.displayName);
+    cy.get(assetDetails.locators.description).type(assetDetails.data.description);
+    cy.get(assetDetails.locators.primaryButton).click();
+    
+    // Fill connection details dynamically
+    if (assetDetails.connectionDetails.database) {
+        cy.get(assetDetails.locators.database).type(assetDetails.connectionDetails.database);
+    }
+    if (assetDetails.connectionDetails.host) {
+        cy.get(assetDetails.locators.host).type(assetDetails.connectionDetails.host);
+    }
+    if (assetDetails.connectionDetails.port) {
+        cy.get(assetDetails.locators.port).type(assetDetails.connectionDetails.port);
+    }
+    if (assetDetails.connectionDetails.username) {
+        cy.get(assetDetails.locators.username).type(assetDetails.connectionDetails.username);
+    }
+    if (assetDetails.connectionDetails.password) {
+        cy.get(assetDetails.locators.password).type(assetDetails.connectionDetails.password);
+    }
+
+    // Test connection and submit
+    cy.get(assetDetails.locators.testConnection).click();
+    cy.wait(2000);
+    cy.get(assetDetails.locators.closeModal).click();
+    cy.wait(1000);
+    cy.get(assetDetails.locators.submitButton).click();
+});
+
+
+Cypress.Commands.add('fillConfigurationService',(configDetails) => {
+
+    cy.xpath(configDetails.locators.domain).select(configDetails.constants.domain)
+    cy.xpath(configDetails.locators.sub_domain).select(configDetails.constants.sub_domain)
+    cy.xpath(configDetails.locators.environment).select(configDetails.constants.environment)
+    //randon text function.......
+    cy.xpath(configDetails.locators.service_name).type("QA_Automation")
+    cy.xpath(configDetails.locators.label).type(configDetails.constants.label)
+    cy.xpath(configDetails.locators.service_details).type(configDetails.constants.service_details)
+    cy.xpath(configDetails.locators.saveNcontinue).click()
+})
+
+//final command for asset page navigation 
+
+Cypress.Commands.add('navigateToServiceCreation', (serviceType) => {
+    // Navigate to assets page
+    cy.xpath(locators.assetCreation.assetsMenu).click()
+    cy.wait(1000)
+    
+    // Click create new button 
+    cy.xpath(locators.assetCreation.createNewBtn).click()
+    cy.wait(1000)
+    
+    // Select the database type using XPath
+    cy.xpath(util.format(locators.assetCreation.serviceTypeSelector, serviceType)).click()
+    cy.wait(1000)
+    
+    // Click the primary button to proceed
+    cy.xpath(locators.assetCreation.primaryBtn).click()
+});
+
+//final command for page 1
+
+Cypress.Commands.add('configureServiceMetadata', (serviceMetadata) => {
+  cy.xpath(locators.serviceConfig.domain).select(serviceMetadata.domain)
+  cy.xpath(locators.serviceConfig.subDomain).select(serviceMetadata.subDomain)
+  cy.xpath(locators.serviceConfig.environment).select(serviceMetadata.environment)
+  cy.xpath(locators.serviceConfig.serviceName).type(serviceMetadata.serviceName)
+  cy.xpath(locators.serviceConfig.label).type(serviceMetadata.label)
+  cy.xpath(locators.serviceConfig.serviceDetails).type(serviceMetadata.serviceDetails)
+  cy.xpath(locators.serviceConfig.submitBtn).click()
+});
+
+//test connection final command
+
+Cypress.Commands.add('handleTestConnection', () => {
+    cy.xpath(locators.dbConnection.testConnection).click()
+    cy.wait(5000)
+    cy.xpath(locators.dbConnection.closeModal).click()
+    cy.wait(1000)
+    cy.xpath(locators.serviceConfig.submitBtn).click()
+  });
